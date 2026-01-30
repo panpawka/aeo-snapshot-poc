@@ -75,7 +75,6 @@ export function SnapshotForm({ onSubmit, loading }: SnapshotFormProps) {
             color: "var(--fg)",
             fontSize: "1rem",
           }}>
-          <option value="gpt-4o">GPT-4o (OpenAI)</option>
           <option value="gpt-4o-mini">GPT-4o Mini (OpenAI)</option>
           <option value="claude-sonnet-4">Claude Sonnet 4 (Anthropic)</option>
           <option value="claude-haiku-4">Claude Haiku 4 (Anthropic)</option>

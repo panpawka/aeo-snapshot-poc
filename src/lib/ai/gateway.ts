@@ -1,9 +1,7 @@
 import { generateText } from "ai";
-import { openai } from "@ai-sdk/openai";
-import { anthropic } from "@ai-sdk/anthropic";
-import { google } from "@ai-sdk/google";
+import { gateway } from "@ai-sdk/gateway";
 
-const DEFAULT_MODEL = process.env.DEFAULT_MODEL || "gpt-4o";
+const DEFAULT_MODEL = process.env.DEFAULT_MODEL || "openai/gpt-4o-mini";
 
 /**
  * Resolve a model string to a Vercel AI SDK provider instance.
@@ -11,15 +9,18 @@ const DEFAULT_MODEL = process.env.DEFAULT_MODEL || "gpt-4o";
  * Supports OpenAI, Anthropic, and Google models via the AI SDK's
  * unified interface — the "gateway" pattern from the PRD.
  */
-function resolveModel(modelId: string) {
-  if (modelId.startsWith("claude")) {
-    return anthropic(modelId);
+function resolveGateway(modelId: string) {
+  if (modelId.startsWith("claude-sonnet-4")) {
+    return gateway("anthropic/claude-sonnet-4");
   }
-  if (modelId.startsWith("gemini")) {
-    return google(modelId);
+  if (modelId.startsWith("gemini-2.0-flash")) {
+    return gateway("google/gemini-2.0-flash");
   }
-  // Default to OpenAI for gpt-* and any unrecognized models
-  return openai(modelId);
+  if (modelId.startsWith("gpt-4o-mini")) {
+    return gateway("openai/gpt-4o-mini");
+  }
+  // Default to OpenAI for any unrecognized models
+  return gateway("openai/gpt-4o");
 }
 
 /**
@@ -28,12 +29,12 @@ function resolveModel(modelId: string) {
  */
 export async function generate(
   prompt: string,
-  modelId?: string
+  modelId?: string,
 ): Promise<string> {
-  const model = resolveModel(modelId || DEFAULT_MODEL);
+  const gateway = resolveGateway(modelId || DEFAULT_MODEL);
 
   const { text } = await generateText({
-    model,
+    model: gateway,
     prompt,
   });
 
