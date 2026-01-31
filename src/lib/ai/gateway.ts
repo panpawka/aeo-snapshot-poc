@@ -1,7 +1,10 @@
-import { generateText } from "ai";
+import { generateText, Output } from "ai";
 import { gateway } from "@ai-sdk/gateway";
+import { z } from "zod";
 
 const DEFAULT_MODEL = process.env.DEFAULT_MODEL || "openai/gpt-4o-mini";
+
+export { DEFAULT_MODEL };
 
 /**
  * Resolve a model string to a Vercel AI SDK provider instance.
@@ -10,17 +13,20 @@ const DEFAULT_MODEL = process.env.DEFAULT_MODEL || "openai/gpt-4o-mini";
  * unified interface — the "gateway" pattern from the PRD.
  */
 function resolveGateway(modelId: string) {
-  if (modelId.startsWith("claude-sonnet-4")) {
-    return gateway("anthropic/claude-sonnet-4");
+  if (modelId.startsWith("claude-haiku-4.5")) {
+    return gateway("anthropic/claude-haiku-4.5");
   }
-  if (modelId.startsWith("gemini-2.0-flash")) {
-    return gateway("google/gemini-2.0-flash");
+  if (modelId.startsWith("sonar")) {
+    return gateway("perplexity/sonar");
+  }
+  if (modelId.startsWith("gemini-3-flash")) {
+    return gateway("google/gemini-3-flash");
   }
   if (modelId.startsWith("gpt-4o-mini")) {
     return gateway("openai/gpt-4o-mini");
   }
   // Default to OpenAI for any unrecognized models
-  return gateway("openai/gpt-4o");
+  return gateway("openai/gpt-4o-mini");
 }
 
 /**
@@ -41,4 +47,23 @@ export async function generate(
   return text;
 }
 
-export { DEFAULT_MODEL };
+/**
+ * Generate structured data matching a Zod schema.
+ */
+export async function generateStructured<T>(
+  prompt: string,
+  schema: z.ZodType<T>,
+  modelId?: string,
+): Promise<T> {
+  const gateway = resolveGateway(modelId || DEFAULT_MODEL);
+
+  const result = await generateText({
+    model: gateway,
+    prompt,
+    output: Output.object({
+      schema,
+    }),
+  });
+
+  return result.output;
+}

@@ -1,29 +1,22 @@
+import { z } from "zod";
 import type { Section } from "./types";
 
-interface BrandRecognitionData {
-  score: number;
-  visibility: string;
-  reasoning: string;
-  keyFactors: string[];
-}
+const schema = z.object({
+  score: z.number(),
+  visibility: z.enum(["high", "medium", "low"]),
+  reasoning: z.string(),
+  keyFactors: z.array(z.string()),
+});
+
+type BrandRecognitionData = z.infer<typeof schema>;
 
 export const brandRecognition: Section<BrandRecognitionData> = {
   id: "brand_recognition",
   title: "Brand Recognition",
 
   prompt(brandName: string) {
-    return `You are an AI answer engine analyst. Evaluate the brand "${brandName}" for AI-perceived visibility and recognition.
-
-Respond ONLY with valid JSON in this exact format (no markdown, no explanation outside the JSON):
-{
-  "score": <number 1-10>,
-  "visibility": "<high | medium | low>",
-  "reasoning": "<2-3 sentence explanation of how AI systems would perceive this brand's recognition>",
-  "keyFactors": ["<factor 1>", "<factor 2>", "<factor 3>"]
-}`;
+    return `Evaluate the brand "${brandName}" for AI-perceived visibility and recognition. Return 'visibility' as lowercase: high, medium, low. Return 'score' as a number between 1 and 10.`;
   },
 
-  parse(response: string): BrandRecognitionData {
-    return JSON.parse(response);
-  },
+  schema,
 };

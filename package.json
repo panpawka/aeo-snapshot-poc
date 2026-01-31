@@ -9,13 +9,14 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "ai": "^6.0.14",
-    "@ai-sdk/gateway": "3.0.16",
-    "@ai-sdk/provider": "3.0.4",
-    "@ai-sdk/react": "3.0.41",
+    "@ai-sdk/gateway": "3.0.29",
+    "@react-pdf/renderer": "^4.3.2",
+    "ai": "6.0.64",
     "next": "^16.1.0",
+    "pako": "^2.1.0",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",

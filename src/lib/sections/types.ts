@@ -1,3 +1,5 @@
+import { z } from "zod";
+
 /**
  * Core section interface — every AEO report section implements this.
  *
@@ -14,8 +16,8 @@ export interface Section<T = unknown> {
   /** Generates a self-contained prompt for the LLM — no shared context */
   prompt(brandName: string): string;
 
-  /** Transforms raw LLM text output into structured data */
-  parse(response: string): T;
+  /** Zod schema to enforce structured output */
+  schema: z.ZodType<T>;
 }
 
 /**

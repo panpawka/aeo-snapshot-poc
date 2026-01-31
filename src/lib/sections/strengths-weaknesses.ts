@@ -1,35 +1,21 @@
+import { z } from "zod";
 import type { Section } from "./types";
 
-interface StrengthsWeaknessesData {
-  strengths: { point: string; explanation: string }[];
-  weaknesses: { point: string; explanation: string }[];
-  summary: string;
-}
+const schema = z.object({
+  strengths: z.array(z.object({ point: z.string(), explanation: z.string() })),
+  weaknesses: z.array(z.object({ point: z.string(), explanation: z.string() })),
+  summary: z.string(),
+});
+
+type StrengthsWeaknessesData = z.infer<typeof schema>;
 
 export const strengthsWeaknesses: Section<StrengthsWeaknessesData> = {
   id: "strengths_weaknesses",
   title: "Strengths & Weaknesses",
 
   prompt(brandName: string) {
-    return `You are an AI answer engine analyst. Identify the perceived strengths and weaknesses of the brand "${brandName}" as an AI system would present them.
-
-Respond ONLY with valid JSON in this exact format (no markdown, no explanation outside the JSON):
-{
-  "strengths": [
-    { "point": "<strength>", "explanation": "<why this is a strength>" },
-    { "point": "<strength>", "explanation": "<why this is a strength>" },
-    { "point": "<strength>", "explanation": "<why this is a strength>" }
-  ],
-  "weaknesses": [
-    { "point": "<weakness>", "explanation": "<why this is a weakness>" },
-    { "point": "<weakness>", "explanation": "<why this is a weakness>" },
-    { "point": "<weakness>", "explanation": "<why this is a weakness>" }
-  ],
-  "summary": "<1-2 sentence overall assessment>"
-}`;
+    return `Identify the perceived strengths and weaknesses of the brand "${brandName}" as an AI system would present them.`;
   },
 
-  parse(response: string): StrengthsWeaknessesData {
-    return JSON.parse(response);
-  },
+  schema,
 };

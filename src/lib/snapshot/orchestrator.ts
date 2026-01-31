@@ -1,7 +1,7 @@
 import type { Section, SectionResult } from "@/lib/sections/types";
 import type { Snapshot, SnapshotRequest } from "./types";
 import { resolveSections } from "@/lib/sections";
-import { generate, DEFAULT_MODEL } from "@/lib/ai/gateway";
+import { generateStructured, DEFAULT_MODEL } from "@/lib/ai/gateway";
 
 /**
  * Execute a single section — isolates failures so one bad section
@@ -10,12 +10,11 @@ import { generate, DEFAULT_MODEL } from "@/lib/ai/gateway";
 async function executeSection(
   section: Section,
   brandName: string,
-  model?: string
+  model?: string,
 ): Promise<SectionResult> {
   try {
     const prompt = section.prompt(brandName);
-    const raw = await generate(prompt, model);
-    const data = section.parse(raw);
+    const data = await generateStructured(prompt, section.schema, model);
     return { status: "success", data };
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
@@ -31,7 +30,7 @@ async function executeSection(
  * no shared context) and assembles the results.
  */
 export async function generateSnapshot(
-  request: SnapshotRequest
+  request: SnapshotRequest,
 ): Promise<Snapshot> {
   const { brandName, enabledSections, model } = request;
   const resolvedModel = model || DEFAULT_MODEL;
@@ -41,7 +40,7 @@ export async function generateSnapshot(
     sections.map(async (section) => ({
       id: section.id,
       result: await executeSection(section, brandName, resolvedModel),
-    }))
+    })),
   );
 
   const sectionResults: Record<string, SectionResult> = {};
